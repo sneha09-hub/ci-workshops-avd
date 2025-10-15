@@ -101,7 +101,7 @@ port_channel_interfaces:
     enabled: true
     mode: trunk
     trunk:
-      allowed_vlan: '40'
+      allowed_vlan: none
 - name: Port-Channel4
   description: SERVER_s2-host2
   shutdown: false
@@ -141,9 +141,6 @@ vlans:
   trunk_groups:
   - MLAG
   tenant: system
-- id: 40
-  name: Forty
-  tenant: MY_FABRIC
 vrfs:
 - name: default
   ip_routing: false
