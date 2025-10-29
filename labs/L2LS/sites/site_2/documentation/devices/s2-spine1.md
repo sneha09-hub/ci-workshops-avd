@@ -3,7 +3,6 @@
 ## Table of Contents
 
 - [Management](#management)
-  - [Banner](#banner)
   - [Management Interfaces](#management-interfaces)
   - [DNS Domain](#dns-domain)
   - [NTP](#ntp)
@@ -14,7 +13,6 @@
   - [AAA Authorization](#aaa-authorization)
 - [Monitoring](#monitoring)
   - [TerminAttr Daemon](#terminattr-daemon)
-  - [Logging](#logging)
 - [MLAG](#mlag)
   - [MLAG Summary](#mlag-summary)
   - [MLAG Device Configuration](#mlag-device-configuration)
@@ -46,15 +44,6 @@
   - [VRF Instances Device Configuration](#vrf-instances-device-configuration)
 
 ## Management
-
-### Banner
-
-#### MOTD Banner
-
-```text
-You shall not pass. Unless you are authorized. Then you shall pass.
-EOF
-```
 
 ### Management Interfaces
 
@@ -151,7 +140,6 @@ management api http-commands
 ```eos
 !
 username arista privilege 15 role network-admin secret sha512 <removed>
-username arista ssh-key ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC52GIN7FRj7psNcDMZenAsCsxibogEX5B/MkHuAX1y5DZxX6RdRyL6kZSQxqsw/xzYyrhz9qU0YkuXG7eOiv1kovq+DPKc0WgnJXm5mLr0SPaVXgzqn0M7lLPGf4Kjkg1PBimEX+fSZ6aqHZv17PBah4UNheaC2a8ZllPDHLbivkaKA+H/n/efzQGfDoHcgtRBlZbn1mh4de3DC5dpPiZjRjtYzYFldcByGJNk6TZix+d2585bLDpa8DXMeMCap2xpufhGIzF72LjXbVtwXsM8zR1HdNgy6kLpirthhF4PcCAghWH++Lo69WdvGxMkz11yvfCjxjz7cdCdnNCmSEpr arista@mississauga-day2-20-69ecb3e5-eos
 ```
 
 ### Enable Password
@@ -192,31 +180,6 @@ aaa authorization exec default local
 daemon TerminAttr
    exec /usr/bin/TerminAttr -cvaddr=192.168.0.5:9910 -cvauth=token,/tmp/token -smashexcludes=ale,flexCounter,hardware,kni,pulse,strata -ingestexclude=/Sysdb/cell/1/agent,/Sysdb/cell/2/agent -taillogs
    no shutdown
-```
-
-### Logging
-
-#### Logging Servers and Features Summary
-
-| Type | Level |
-| -----| ----- |
-
-| VRF | Source Interface |
-| --- | ---------------- |
-| default | Management0 |
-
-| VRF | Hosts | Ports | Protocol | SSL-profile |
-| --- | ----- | ----- | -------- | ----------- |
-| default | 10.200.0.108 | Default | UDP | - |
-| default | 10.200.1.108 | Default | UDP | - |
-
-#### Logging Servers and Features Device Configuration
-
-```eos
-!
-logging host 10.200.0.108
-logging host 10.200.1.108
-logging source-interface Management0
 ```
 
 ## MLAG
@@ -289,6 +252,8 @@ vlan internal order ascending range 1006 1199
 | VLAN ID | Name | Trunk Groups |
 | ------- | ---- | ------------ |
 | 30 | Thirty | - |
+| 40 | Forty | - |
+| 45 | Forty-five | - |
 | 4093 | MLAG_L3 | MLAG |
 | 4094 | MLAG | MLAG |
 
@@ -298,6 +263,12 @@ vlan internal order ascending range 1006 1199
 !
 vlan 30
    name Thirty
+!
+vlan 40
+   name Forty
+!
+vlan 45
+   name Forty-five
 !
 vlan 4093
    name MLAG_L3
@@ -321,8 +292,8 @@ vlan 4094
 | Ethernet1 | MLAG_s2-spine2_Ethernet1 | *trunk | *- | *- | *MLAG | 1 |
 | Ethernet2 | L2_s2-leaf1_Ethernet2 | *trunk | *30 | *- | *- | 2 |
 | Ethernet3 | L2_s2-leaf2_Ethernet2 | *trunk | *30 | *- | *- | 2 |
-| Ethernet4 | L2_s2-leaf3_Ethernet2 | *trunk | *none | *- | *- | 4 |
-| Ethernet5 | L2_s2-leaf4_Ethernet2 | *trunk | *none | *- | *- | 4 |
+| Ethernet4 | L2_s2-leaf3_Ethernet2 | *trunk | *40 | *- | *- | 4 |
+| Ethernet5 | L2_s2-leaf4_Ethernet2 | *trunk | *40 | *- | *- | 4 |
 | Ethernet6 | MLAG_s2-spine2_Ethernet6 | *trunk | *- | *- | *MLAG | 1 |
 
 *Inherited from Port-Channel Interface
@@ -397,7 +368,7 @@ interface Ethernet8
 | --------- | ----------- | ---- | ----- | ----------- | ------------| --------------------- | ------------------ | ------- | -------- |
 | Port-Channel1 | MLAG_s2-spine2_Port-Channel1 | trunk | - | - | MLAG | - | - | - | - |
 | Port-Channel2 | L2_RACK1_Port-Channel2 | trunk | 30 | - | - | - | - | 2 | - |
-| Port-Channel4 | L2_RACK2_Port-Channel2 | trunk | none | - | - | - | - | 4 | - |
+| Port-Channel4 | L2_RACK2_Port-Channel2 | trunk | 40 | - | - | - | - | 4 | - |
 
 #### Port-Channel Interfaces Device Configuration
 
@@ -421,7 +392,7 @@ interface Port-Channel2
 interface Port-Channel4
    description L2_RACK2_Port-Channel2
    no shutdown
-   switchport trunk allowed vlan none
+   switchport trunk allowed vlan 40
    switchport mode trunk
    switchport
    mlag 4
@@ -461,6 +432,8 @@ interface Loopback0
 | Interface | Description | VRF |  MTU | Shutdown |
 | --------- | ----------- | --- | ---- | -------- |
 | Vlan30 | Thirty | default | - | False |
+| Vlan40 | Forty | default | - | False |
+| Vlan45 | Forty-five | default | - | False |
 | Vlan4093 | MLAG_L3 | default | 1500 | False |
 | Vlan4094 | MLAG | default | 1500 | False |
 
@@ -469,6 +442,8 @@ interface Loopback0
 | Interface | VRF | IP Address | IP Address Virtual | IP Router Virtual Address | ACL In | ACL Out |
 | --------- | --- | ---------- | ------------------ | ------------------------- | ------ | ------- |
 | Vlan30 |  default  |  10.30.30.2/24  |  -  |  10.30.30.1  |  -  |  -  |
+| Vlan40 |  default  |  10.40.40.2/24  |  -  |  10.40.40.1  |  -  |  -  |
+| Vlan45 |  default  |  10.45.45.2/24  |  -  |  10.45.45.1  |  -  |  -  |
 | Vlan4093 |  default  |  10.2.253.2/31  |  -  |  -  |  -  |  -  |
 | Vlan4094 |  default  |  10.2.253.0/31  |  -  |  -  |  -  |  -  |
 
@@ -481,6 +456,18 @@ interface Vlan30
    no shutdown
    ip address 10.30.30.2/24
    ip virtual-router address 10.30.30.1
+!
+interface Vlan40
+   description Forty
+   no shutdown
+   ip address 10.40.40.2/24
+   ip virtual-router address 10.40.40.1
+!
+interface Vlan45
+   description Forty-five
+   no shutdown
+   ip address 10.45.45.2/24
+   ip virtual-router address 10.45.45.1
 !
 interface Vlan4093
    description MLAG_L3
