@@ -3,7 +3,6 @@
 ## Table of Contents
 
 - [Management](#management)
-  - [Banner](#banner)
   - [Management Interfaces](#management-interfaces)
   - [DNS Domain](#dns-domain)
   - [NTP](#ntp)
@@ -14,7 +13,6 @@
   - [AAA Authorization](#aaa-authorization)
 - [Monitoring](#monitoring)
   - [TerminAttr Daemon](#terminattr-daemon)
-  - [Logging](#logging)
 - [MLAG](#mlag)
   - [MLAG Summary](#mlag-summary)
   - [MLAG Device Configuration](#mlag-device-configuration)
@@ -43,15 +41,6 @@
   - [VRF Instances Device Configuration](#vrf-instances-device-configuration)
 
 ## Management
-
-### Banner
-
-#### MOTD Banner
-
-```text
-You shall not pass. Unless you are authorized. Then you shall pass.
-EOF
-```
 
 ### Management Interfaces
 
@@ -148,7 +137,6 @@ management api http-commands
 ```eos
 !
 username arista privilege 15 role network-admin secret sha512 <removed>
-username arista ssh-key ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC52GIN7FRj7psNcDMZenAsCsxibogEX5B/MkHuAX1y5DZxX6RdRyL6kZSQxqsw/xzYyrhz9qU0YkuXG7eOiv1kovq+DPKc0WgnJXm5mLr0SPaVXgzqn0M7lLPGf4Kjkg1PBimEX+fSZ6aqHZv17PBah4UNheaC2a8ZllPDHLbivkaKA+H/n/efzQGfDoHcgtRBlZbn1mh4de3DC5dpPiZjRjtYzYFldcByGJNk6TZix+d2585bLDpa8DXMeMCap2xpufhGIzF72LjXbVtwXsM8zR1HdNgy6kLpirthhF4PcCAghWH++Lo69WdvGxMkz11yvfCjxjz7cdCdnNCmSEpr arista@mississauga-day2-20-69ecb3e5-eos
 ```
 
 ### Enable Password
@@ -189,31 +177,6 @@ aaa authorization exec default local
 daemon TerminAttr
    exec /usr/bin/TerminAttr -cvaddr=192.168.0.5:9910 -cvauth=token,/tmp/token -smashexcludes=ale,flexCounter,hardware,kni,pulse,strata -ingestexclude=/Sysdb/cell/1/agent,/Sysdb/cell/2/agent -taillogs
    no shutdown
-```
-
-### Logging
-
-#### Logging Servers and Features Summary
-
-| Type | Level |
-| -----| ----- |
-
-| VRF | Source Interface |
-| --- | ---------------- |
-| default | Management0 |
-
-| VRF | Hosts | Ports | Protocol | SSL-profile |
-| --- | ----- | ----- | -------- | ----------- |
-| default | 10.200.0.108 | Default | UDP | - |
-| default | 10.200.1.108 | Default | UDP | - |
-
-#### Logging Servers and Features Device Configuration
-
-```eos
-!
-logging host 10.200.0.108
-logging host 10.200.1.108
-logging source-interface Management0
 ```
 
 ## MLAG
@@ -285,11 +248,15 @@ vlan internal order ascending range 1006 1199
 
 | VLAN ID | Name | Trunk Groups |
 | ------- | ---- | ------------ |
+| 40 | Forty | - |
 | 4094 | MLAG | MLAG |
 
 ### VLANs Device Configuration
 
 ```eos
+!
+vlan 40
+   name Forty
 !
 vlan 4094
    name MLAG
@@ -307,8 +274,8 @@ vlan 4094
 | Interface | Description | Mode | VLANs | Native VLAN | Trunk Group | Channel-Group |
 | --------- | ----------- | ---- | ----- | ----------- | ----------- | ------------- |
 | Ethernet1 | MLAG_s2-leaf4_Ethernet1 | *trunk | *- | *- | *MLAG | 1 |
-| Ethernet2 | L2_s2-spine1_Ethernet4 | *trunk | *none | *- | *- | 2 |
-| Ethernet3 | L2_s2-spine2_Ethernet4 | *trunk | *none | *- | *- | 2 |
+| Ethernet2 | L2_s2-spine1_Ethernet4 | *trunk | *40 | *- | *- | 2 |
+| Ethernet3 | L2_s2-spine2_Ethernet4 | *trunk | *40 | *- | *- | 2 |
 | Ethernet4 | SERVER_s2-host2_eth1 | *access | *40 | *- | *- | 4 |
 | Ethernet6 | MLAG_s2-leaf4_Ethernet6 | *trunk | *- | *- | *MLAG | 1 |
 
@@ -353,7 +320,7 @@ interface Ethernet6
 | Interface | Description | Mode | VLANs | Native VLAN | Trunk Group | LACP Fallback Timeout | LACP Fallback Mode | MLAG ID | EVPN ESI |
 | --------- | ----------- | ---- | ----- | ----------- | ------------| --------------------- | ------------------ | ------- | -------- |
 | Port-Channel1 | MLAG_s2-leaf4_Port-Channel1 | trunk | - | - | MLAG | - | - | - | - |
-| Port-Channel2 | L2_SPINES_Port-Channel4 | trunk | none | - | - | - | - | 2 | - |
+| Port-Channel2 | L2_SPINES_Port-Channel4 | trunk | 40 | - | - | - | - | 2 | - |
 | Port-Channel4 | SERVER_s2-host2 | access | 40 | - | - | - | - | 4 | - |
 
 #### Port-Channel Interfaces Device Configuration
@@ -370,7 +337,7 @@ interface Port-Channel1
 interface Port-Channel2
    description L2_SPINES_Port-Channel4
    no shutdown
-   switchport trunk allowed vlan none
+   switchport trunk allowed vlan 40
    switchport mode trunk
    switchport
    mlag 2

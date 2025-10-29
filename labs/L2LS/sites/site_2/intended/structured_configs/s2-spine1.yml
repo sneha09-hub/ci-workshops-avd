@@ -92,9 +92,7 @@ local_users:
 - name: arista
   privilege: 15
   role: network-admin
-  sha512_password: $6$arista$6QRVrN6SlPUgFkBHzqldYZdA6avOTev4uog04QLa1IL.uOle0BzDf2jv7SjVMQTLfrg2uQoYY92Fjn2PN7ZsW1
-  ssh_key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC52GIN7FRj7psNcDMZenAsCsxibogEX5B/MkHuAX1y5DZxX6RdRyL6kZSQxqsw/xzYyrhz9qU0YkuXG7eOiv1kovq+DPKc0WgnJXm5mLr0SPaVXgzqn0M7lLPGf4Kjkg1PBimEX+fSZ6aqHZv17PBah4UNheaC2a8ZllPDHLbivkaKA+H/n/efzQGfDoHcgtRBlZbn1mh4de3DC5dpPiZjRjtYzYFldcByGJNk6TZix+d2585bLDpa8DXMeMCap2xpufhGIzF72LjXbVtwXsM8zR1HdNgy6kLpirthhF4PcCAghWH++Lo69WdvGxMkz11yvfCjxjz7cdCdnNCmSEpr
-    arista@mississauga-day2-20-69ecb3e5-eos
+  sha512_password: $6$arista$pL8DCH9a.LHz09v1pnnZCA5rX.UcAmJjjZ45VHDmOxV1cL34uhFTY63w9.c.PY9ZXepzcUu4hE5xT5uApLjFz1
 loopback_interfaces:
 - name: Loopback0
   description: ROUTER_ID
@@ -150,7 +148,7 @@ port_channel_interfaces:
     enabled: true
     mode: trunk
     trunk:
-      allowed_vlan: none
+      allowed_vlan: '40'
 router_ospf:
   process_ids:
   - id: 100
@@ -200,6 +198,24 @@ vlan_interfaces:
   tenant: MY_FABRIC
   tags:
   - DB
+- name: Vlan40
+  description: Forty
+  shutdown: false
+  ip_address: 10.40.40.2/24
+  ip_virtual_router_addresses:
+  - 10.40.40.1
+  tenant: MY_FABRIC
+  tags:
+  - DMZ
+- name: Vlan45
+  description: Forty-five
+  shutdown: false
+  ip_address: 10.45.45.2/24
+  ip_virtual_router_addresses:
+  - 10.45.45.1
+  tenant: MY_FABRIC
+  tags:
+  - Guest
 vlan_internal_order:
   allocation: ascending
   range:
@@ -218,6 +234,12 @@ vlans:
   tenant: system
 - id: 30
   name: Thirty
+  tenant: MY_FABRIC
+- id: 40
+  name: Forty
+  tenant: MY_FABRIC
+- id: 45
+  name: Forty-five
   tenant: MY_FABRIC
 vrfs:
 - name: default
